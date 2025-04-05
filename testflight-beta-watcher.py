@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 import pytz
 import requests
@@ -7,14 +8,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-url = "https://testflight.apple.com/join/"
-apps = {
-    "WhatsApp": "s4rTJVPb",
-    "Discord": "gdE4pRzI",
-    "ProtonMail": "8SxXknzD",
-    "GitHub": "8SxXknzD",
-    "Signal": "8FHtd1Jq",
-}
+def load_apps_from_json(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except Exception as e:
+        print(f"Error loading apps from JSON file: {str(e)}")
+        return {}
+
+apps_file_path = "apps.json"
+apps = load_apps_from_json(apps_file_path)
 
 api_token = os.getenv("PUSHOVER_API_TOKEN")
 user_key = os.getenv("PUSHOVER_USER_KEY")
@@ -25,13 +28,13 @@ def check_beta():
         print(f"\nChecking: {app}")
         
         try:
-            resp = requests.get(f"{url}/{code}", timeout=10)
+            resp = requests.get(f"https://testflight.apple.com/join/{code}", timeout=10)
             print(f"Status: {resp.status_code}")
             
             if resp.ok:
                 if "Join the Beta" in resp.text:
-                    send_push_alert(app, code, url)
-                    write_log(f"✅ Found ✅: {app}, {url + code}")
+                    send_push_alert(app, code, "https://testflight.apple.com/join/")
+                    write_log(f"✅ Found ✅: {app}, https://testflight.apple.com/join/{code}")
                 else:
                     write_log(f"⛔️ Unavailable ⛔️: {app}")
             else:
@@ -40,7 +43,6 @@ def check_beta():
         except requests.exceptions.RequestException as e:
             write_log(f"❗ Error ❗: {app} - {str(e)}")
             print(f"Error checking {app}: {str(e)}")
-
 
 def send_push_alert(app, code, url):
     if not api_token or not user_key:
@@ -62,7 +64,6 @@ def send_push_alert(app, code, url):
         print(f"Error sending push alert for {app}: {str(e)}")
         write_log(f"❗ Error sending push alert for {app}: {str(e)}")
 
-
 def write_log(message):
     time24hr = datetime.now(pytz.timezone("Europe/Istanbul")).strftime("%Y-%m-%d %H:%M:%S")
     try:
@@ -70,7 +71,6 @@ def write_log(message):
             log_file.write(f"{time24hr} -- {message}\n")
     except Exception as e:
         print(f"Error writing to log file: {str(e)}")
-
 
 if __name__ == '__main__':
     while True:

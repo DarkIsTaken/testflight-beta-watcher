@@ -8,15 +8,16 @@ This script checks TestFlight beta apps and alerts you when there's open slots f
 
 <img src="/notification.png" width=50%>
 
-#### Prepare TestFlight apps
+### Prepare TestFlight apps
 Search online for the app TestFlight invitation URL.
 
 E.g.
 [Slack](https://slack.com/beta/ios) TestFlight invitation URL is:
  `https://testflight.apple.com/join/QE3kgqJ2`
 
+Sample **apps.json**:
 ```json
-apps = {
+{
     "Slack": "QE3kgqJ2",
     "Discord": "gdE4pRzI",
     "ProtonMail": "8SxXknzD",
@@ -25,22 +26,26 @@ apps = {
 }
 ```
 
-#### Notifications
+### Notifications
 For push notifications, I'm using the [Pushover](https://pushover.net) service, but there are many alternatives.
 
-In `send_push_alert()`:
+In **.env** file:
+```env
+PUSHOVER_API_TOKEN=<your-token-goes-here>
+PUSHOVER_USER_KEY=<your-key-goes-here>
+```
 * Enter the user api token
 * Enter the app api token
 
 
-#### Run
+### Run
 
 Set up a service or cron to run the script at an interval
 
 E.g.
 `0 */6 * * * python3 testflight-beta-watcher.py`
 
-##
-#### Disclaimer
+---
+### Disclaimer
 
 This software {testflight-beta-watcher} has not been endorsed or supported by Apple or Pushover and is in no way associated with them and/or its subsidiaries or affiliate.
